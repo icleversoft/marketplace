@@ -29,20 +29,21 @@ class ItemDiscount < Discount
   end
 
   def apply!(items)
-    items.collect!(&apply_dicount) if active?(items)
+    @items = items
+    items.collect!(&apply_discount) if active?
   end
   
   private
-  def active?(items)
-    items_for_discount(items).count >= limit
+  def active?
+    items_for_discount.count >= limit
   end
 
-  def items_for_discount( items )
-    items.select{|i| i.code == @code}.map(&:code)
+  def items_for_discount
+    @items.select{|i| i.code == @code}.map(&:code)
   end
 
   def apply_discount
-    ->(item){items_for_discount.include?(item.code) ? item.price = dropped_price : item.price}
+    ->(item){items_for_discount.include?(item.code) ? item.price = dropped_price : item}
   end
 
 end
@@ -51,22 +52,40 @@ end
 class PurchaseDiscount < Discount
   class << self
     def with_options( options = {} )
-      super( items )
-      @percentage = options[:percentage] || 0.0
-      raise ArgumentError.new("Percentage should be greater than 0!")
+      PurchaseDiscount.new( options  )
     end
+  end
+
+  def initialize( options = {} )
+    super( options )
+    @percentage = options[:percentage] || 0.0
+  end
+
+
+  def limit
+    @limit.to_f
+  end
+
+  def apply!( items )
+    @items = items
+    total
+  end
+
+  def percentage
+    @percentage.to_f
+  end
+
+  private
+  def total
+    active? ? total_cost * (1.0 - percentage / 100.0) : total_cost
   end
 
   def active?
     total_cost > limit
   end
 
-  def total 
-    active? ? total_cost.to_f * @percentage / 100.0 : total_cost
+  def total_cost
+    @total || @items.sum
   end
 
-  private
-  def total_cost
-    items.map(&:price).inject(&:+)
-  end
 end
