@@ -1,28 +1,26 @@
 class Discount
-  attr_reader :items, :limit
+  attr_reader :limit
   def initialize( options = {} )
-    @items = options[:items] || []
-    @limit = options[:limit] 
-    raise ArgumentError.new("Discount requires at least one item!") if @items.empty?
-    raise ArgumentError.new("Discount requires a limit!") unless @limit
+    @limit = options[:limit] || 0 
   end
 
-  def active?
-    true
-  end
+  def apply!(items);end
 end
 
 class ItemDiscount < Discount
   class << self
     def with_options( options = {} )
-      super( options )
-      @price = options[:dropped_price] || 0.0
-      raise ArgumentError.new("Dropped price should have a positive value!") if price <= 0.0
-      raise ArgumentError.new("Limit should be greater than 0") if limit < 1
+      ItemDiscount.new( options )
     end
   end
 
-  def price
+  def initialize( options = {} )
+    super( options )
+    @price = options[:price] || 0.0
+    @code = options[:code] || ''
+  end
+
+  def dropped_price
     @price.to_f
   end
 
@@ -30,13 +28,23 @@ class ItemDiscount < Discount
     @limit.to_i
   end
 
-  def active?
-    items.count >= limit
+  def apply!(items)
+    items.collect!(&apply_dicount) if active?(items)
+  end
+  
+  private
+  def active?(items)
+    items_for_discount(items).count >= limit
   end
 
-  def apply!
-    items.collect!{|i| i.price = @price} if active?
+  def items_for_discount( items )
+    items.select{|i| i.code == @code}.map(&:code)
   end
+
+  def apply_discount
+    ->(item){items_for_discount.include?(item.code) ? item.price = dropped_price : item.price}
+  end
+
 end
 
 

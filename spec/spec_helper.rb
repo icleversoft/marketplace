@@ -1,6 +1,8 @@
 require_relative '../lib/discount'
 require_relative '../lib/checkout'
 require_relative '../lib/item'
+require_relative 'support/shared_example_for_discount'
+require_relative 'support/shared_context'
 # specs live under a `spec` directory, which RSpec adds to the `$LOAD_PATH`.
 # The generated `.rspec` file contains `--require spec_helper` which will cause this
 # file to always be loaded, without a need to explicitly require it in any files.
