@@ -5,6 +5,11 @@ class Discount
   end
 
   def apply!(items);end
+  class << self
+    def descendants
+      ObjectSpace.each_object(::Class).select{|klass| klass < self}
+    end
+  end
 end
 
 class ItemDiscount < Discount
@@ -30,20 +35,16 @@ class ItemDiscount < Discount
 
   def apply!(items)
     @items = items
-    items.collect!(&apply_discount) if active?
+    @items.each(&item_discount) if active?
   end
   
   private
   def active?
-    items_for_discount.count >= limit
+    @items.count_of(@code) >= limit
   end
 
-  def items_for_discount
-    @items.select{|i| i.code == @code}.map(&:code)
-  end
-
-  def apply_discount
-    ->(item){items_for_discount.include?(item.code) ? item.price = dropped_price : item}
+  def item_discount
+    ->(item){item.price = @price if item.code == @code}
   end
 
 end

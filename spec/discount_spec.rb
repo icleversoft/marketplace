@@ -2,6 +2,10 @@ require 'spec_helper'
 
 describe Discount do
   it_behaves_like 'discount'
+
+  it 'returns the descendants' do
+    expect(Discount.descendants).to match_array [PurchaseDiscount, ItemDiscount]
+  end
 end
 
 describe ItemDiscount do
@@ -21,21 +25,20 @@ describe ItemDiscount do
     end
   end
 
-  #it "raises an error when dropped_price is not set" do
-    #expect{ItemDiscount.with_options(items: diff_items, limit: 0)}.to raise_error ArgumentError, "Dropped price should have a positive value!"
-  #end
+  context '#apply' do
+    it 'when discount is not active the price of items remain intact' do
+      cart = Cart.new( basket1 )
+      discount.apply!(cart)
+      expect( cart.sum ).to eq 74.2 
+    end
+    
+    it 'when discount is active the price of items changes to dropped price' do
+      cart = Cart.new( basket2 )
+      discount.apply!(cart)
+      expect( cart.sum ).to eq 36.95 
+    end
 
-  #it "raises an error when dropped_price is not set" do
-    #expect{ItemDiscount.with_options(items: same_items, limit: 0)}.to raise_error ArgumentError, "Dropped price should have a positive value!"
-  #end
-
-  #it "raises an error when dropped_price is not a positive number" do
-    #expect{ItemDiscount.with_options(items: same_items, limit: 0, dropped_price: 0)}.to raise_error ArgumentError, "Dropped price should have a positive value!"
-  #end
-
-  #it "raises an error when limit is not greater than 0" do
-    #expect{ItemDiscount.with_options(items: same_items, limit: 0, dropped_price: 1)}.to raise_error ArgumentError, "Limit should be greater than 0"
-  #end
+  end
 end
 
 describe PurchaseDiscount do

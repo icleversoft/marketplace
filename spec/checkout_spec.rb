@@ -21,4 +21,9 @@ describe Checkout do
     expect(co.price).to eq 36.95
   end
 
+  it "calculates correctly both item discount and purchase discount" do
+    co = Checkout.new( rules )
+    basket3.each{|i| co.scan(i)}
+    expect(co.price.round(2)).to eq 73.76 
+  end
 end

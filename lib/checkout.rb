@@ -1,12 +1,12 @@
 class Checkout
   def initialize( rules )
-    @items = Cart.new 
+    @cart = Cart.new 
     @rules = rules
     @total_price = 0.0
   end
 
   def scan( item )
-    @items << item
+    @cart.add_item( item )
   end
 
   def price
@@ -24,15 +24,15 @@ class Checkout
   end
 
   def apply_purchase_discount( discount )
-    @total_price = discount ? discount.apply!(@items) : calc_total 
+    @total_price = discount ? discount.apply!(@cart) : calc_total 
   end
 
   def item_discount 
-    ->(idisc){idisc.apply!(@items)}
+    ->(idisc){idisc.apply!(@cart)}
   end
 
   def calc_total
-    @items.sum
+    @cart.sum
   end
 
 
