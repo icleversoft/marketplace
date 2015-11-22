@@ -37,14 +37,18 @@ class ItemDiscount < Discount
     @items = items
     @items.each(&item_discount) if active?
   end
-  
+
   private
   def active?
     @items.count_of(@code) >= limit
   end
 
   def item_discount
-    ->(item){item.price = @price if item.code == @code}
+    ->(item){item.price = @price if valid_item_for_discount?(item)}
+  end
+
+  def valid_item_for_discount?(item)
+    item.code == @code && item.price > @price
   end
 
 end
@@ -53,13 +57,18 @@ end
 class PurchaseDiscount < Discount
   class << self
     def with_options( options = {} )
+      percentage = options[:percentage] || 0
+      raise ArgumentError.new("Percentage is not valid") unless valid_percentage?(percentage)
       PurchaseDiscount.new( options  )
+    end
+    def valid_percentage?(percentage)
+      (1..99).cover?(percentage.to_i)
     end
   end
 
   def initialize( options = {} )
     super( options )
-    @percentage = options[:percentage] || 0.0
+    @percentage = options[:percentage]
   end
 
 
@@ -77,6 +86,7 @@ class PurchaseDiscount < Discount
   end
 
   private
+
   def total
     active? ? total_cost * (1.0 - percentage / 100.0) : total_cost
   end
