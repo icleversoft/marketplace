@@ -2,14 +2,10 @@ class Discount
   attr_reader :limit
   def initialize( options = {} )
     @limit = options[:limit] || 0 
+    raise ArgumentError.new("Limit is invalid!") if @limit <= 0
   end
 
   def apply!(items);end
-  class << self
-    def descendants
-      ObjectSpace.each_object(::Class).select{|klass| klass < self}
-    end
-  end
 end
 
 class ItemDiscount < Discount
@@ -57,18 +53,14 @@ end
 class PurchaseDiscount < Discount
   class << self
     def with_options( options = {} )
-      percentage = options[:percentage] || 0
-      raise ArgumentError.new("Percentage is not valid") unless valid_percentage?(percentage)
       PurchaseDiscount.new( options  )
-    end
-    def valid_percentage?(percentage)
-      (1..99).cover?(percentage.to_i)
     end
   end
 
   def initialize( options = {} )
     super( options )
-    @percentage = options[:percentage]
+    @percentage = options[:percentage] || 0.0
+    raise ArgumentError.new("Percentage is not valid") unless valid_percentage?
   end
 
 
@@ -86,6 +78,9 @@ class PurchaseDiscount < Discount
   end
 
   private
+    def valid_percentage?
+      (0..100).cover?(@percentage)
+    end
 
   def total
     active? ? total_cost * (1.0 - percentage / 100.0) : total_cost

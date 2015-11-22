@@ -1,16 +1,14 @@
 require 'spec_helper'
 
 describe Discount do
-  it_behaves_like 'discount'
 
-  it 'returns the descendants' do
-    expect(Discount.descendants).to match_array [PurchaseDiscount, ItemDiscount]
+  it "raises an error when limit is not set or is invalid" do
+    expect{subject}.to raise_error ArgumentError, "Limit is invalid!"
   end
 end
 
 describe ItemDiscount do
   include_context 'data'
-  it_behaves_like 'discount'
   let(:discount){ItemDiscount.with_options(price: 8.5, code: '001', limit: 2)}
 
   context '#dropped_price' do
@@ -43,9 +41,12 @@ end
 
 describe PurchaseDiscount do
   include_context 'data'
-  it_behaves_like 'discount'
 
   let(:discount){PurchaseDiscount.with_options( percentage: 10, limit: 60)}
+
+  it "raises an error when percentage is invalid" do
+    
+  end
 
   it "leave sum of cart intact when it's smaller than discount's lower limit" do
     cart = Cart.new( basket2 )
