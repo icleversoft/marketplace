@@ -1,5 +1,5 @@
 class Checkout
-  def initialize( rules )
+  def initialize( rules = [] )
     @cart = Cart.new 
     @rules = rules
     @total_price = 0.0
@@ -15,8 +15,8 @@ class Checkout
 
   private
   def apply_rules
-    apply_item_discount( @rules.select{|i| i.is_a?(ItemDiscount) } )
-    apply_purchase_discount( @rules.select{|i| i.is_a?(PurchaseDiscount)}.first )
+    apply_item_discount( @rules.select(&item_rule) )
+    apply_purchase_discount( @rules.select(&purchase_rule).first )
   end
 
   def apply_item_discount( item_discounts )
@@ -35,5 +35,12 @@ class Checkout
     @cart.sum
   end
 
+  def purchase_rule
+    ->(rule){rule.is_a? PurchaseDiscount}
+  end
+
+  def item_rule
+    ->(rule){rule.is_a? ItemDiscount}
+  end
 
 end

@@ -9,6 +9,12 @@ describe Checkout do
     ]
   end
 
+  it "keep item prices intact when no promotional rules are set" do
+    co = Checkout.new
+    basket3.each{|i| co.scan(i)}
+    expect(co.price.round(2)).to eq 83.45 
+  end
+
   it "doesn't apply any discount when rules don't being activated" do
     co = Checkout.new( rules )
     basket1.each{|i| co.scan(i)}

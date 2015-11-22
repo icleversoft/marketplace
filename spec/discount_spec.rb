@@ -42,5 +42,18 @@ describe ItemDiscount do
 end
 
 describe PurchaseDiscount do
+  include_context 'data'
   it_behaves_like 'discount'
+
+  let(:discount){PurchaseDiscount.with_options( percentage: 10, limit: 60)}
+
+  it "leave sum of cart intact when it's smaller than discount's lower limit" do
+    cart = Cart.new( basket2 )
+    expect( discount.apply!( cart ) ).to eq 38.45
+  end
+
+  it "returns correctly then new sum when discount has been applied because of lower limit" do
+    cart = Cart.new( basket3 )
+    expect( discount.apply!( cart ) ).to eq 75.105 
+  end
 end
