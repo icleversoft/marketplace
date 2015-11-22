@@ -9,7 +9,7 @@ class Checkout
     @cart.add_item( item )
   end
 
-  def price
+  def total 
     @total_price > 0.0 ? @total_price : apply_rules
   end
 
